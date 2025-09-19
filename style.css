@@ -1,0 +1,36 @@
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0d0d0d, #1a1a40);
+  min-height: 100vh;
+}
+
+h1, h2 {
+  font-weight: bold;
+  text-shadow: 2px 2px 10px rgba(0,0,0,0.6);
+}
+
+.card {
+  background: #f8f9fa;
+  border: none;
+  border-radius: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 8px 20px rgba(0,0,0,0.3);
+}
+
+.coin-logo {
+  width: 60px;
+  height: 60px;
+}
+
+body.light-theme {
+  background: linear-gradient(135deg, #ffffff, #ccccff);
+  color: #000;
+}
+
+body.light-theme .text-light {
+  color: #000 !important;
+}
