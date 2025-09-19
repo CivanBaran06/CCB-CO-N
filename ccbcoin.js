@@ -6,6 +6,13 @@ let balance = 0;         // Kullanıcı bakiyesi
 let myCoins = [];        // Kullanıcının sahip olduğu coinler
 let currentUser = null;  // Giriş yapmış kullanıcı (null = giriş yok)
 
+// Örnek kullanıcı (otomatik login için)
+const savedUser = {
+  username: "testuser",
+  password: "12345",
+  balance: 1000
+};
+
 // -------------------------
 // DOM ELEMENTLERİ
 // -------------------------
@@ -96,10 +103,7 @@ function displayCoins(coins) {
   // Kartlara tıklayınca satın alma ekranını aç
   document.querySelectorAll(".coin-card").forEach(card => {
     card.addEventListener("click", () => {
-      if (!currentUser) {
-        alert("Lütfen önce giriş yapın!");
-        return;
-      }
+      // Artık giriş kontrolü yok
       const coinId = card.getAttribute("data-id");
       const selectedCoin = coinsData.find(c => c.id === coinId);
       showBuyScreen(selectedCoin);
@@ -183,11 +187,6 @@ searchBtn.addEventListener("click", () => {
 // 5️⃣ BAKİYE YÜKLEME
 // -------------------------
 addBalanceBtn.addEventListener("click", () => {
-  if (!currentUser) {
-    alert("Lütfen önce giriş yapın!");
-    return;
-  }
-
   const amount = parseFloat(prompt("Ne kadar bakiye eklemek istiyorsunuz?"));
   if (isNaN(amount) || amount <= 0) return;
 
@@ -281,6 +280,7 @@ backHomeFromSettings.onclick = () => {
 // -------------------------
 // 8️⃣ HESAP / GİRİŞ / ÜYE OL
 // -------------------------
+// Artık testuser login bilgisi ile giriş yapılabilir
 accountBtn.addEventListener("click", () => {
   homeScreen.classList.add("d-none");
   buyScreen.classList.add("d-none");
@@ -305,28 +305,34 @@ loginBtn.addEventListener("click", () => {
   const username = usernameInput.value.trim();
   const password = passwordInput.value.trim();
 
-  if (!username || !password) {
-    alert("Kullanıcı adı ve şifre gerekli!");
-    return;
-  }
+  if ((username === savedUser.username && password === savedUser.password)) {
+    currentUser = username;
+    balance = savedUser.balance;
+    alert(`${currentUser} başarıyla giriş yaptı!`);
+    loginForm.classList.add("d-none");
+    userInfo.classList.remove("d-none");
+    currentUserEl.textContent = currentUser;
+    balanceEl.textContent = balance.toFixed(2);
+  } else {
+    // Normal kullanıcı kontrolleri
+    const storedUser = localStorage.getItem(`user_${username}`);
+    if (!storedUser) {
+      alert("Kullanıcı bulunamadı! Önce üye olun.");
+      return;
+    }
 
-  const storedUser = localStorage.getItem(`user_${username}`);
-  if (!storedUser) {
-    alert("Kullanıcı bulunamadı! Önce üye olun.");
-    return;
-  }
+    const userData = JSON.parse(storedUser);
+    if (userData.password !== password) {
+      alert("Şifre yanlış!");
+      return;
+    }
 
-  const userData = JSON.parse(storedUser);
-  if (userData.password !== password) {
-    alert("Şifre yanlış!");
-    return;
+    currentUser = username;
+    alert(`${currentUser} başarıyla giriş yaptı!`);
+    loginForm.classList.add("d-none");
+    userInfo.classList.remove("d-none");
+    currentUserEl.textContent = currentUser;
   }
-
-  currentUser = username;
-  alert(`${currentUser} başarıyla giriş yaptı!`);
-  loginForm.classList.add("d-none");
-  userInfo.classList.remove("d-none");
-  currentUserEl.textContent = currentUser;
 });
 
 // Üye Ol’a basınca kayıt formu aç
