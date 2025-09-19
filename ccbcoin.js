@@ -60,10 +60,11 @@ const currentUserEl = document.getElementById("currentUser");
 const logoutBtn = document.getElementById("logoutBtn");
 const backHomeFromAccount = document.getElementById("backHomeFromAccount");
 
-// Kayıt formu
+// Kayıt formu ve mesaj
 const registerForm = document.getElementById("registerForm");
 const registerSubmit = document.getElementById("registerSubmit");
 const cancelRegister = document.getElementById("cancelRegister");
+const registerMessage = document.getElementById("registerMessage");
 
 // -------------------------
 // 1️⃣ API'DEN COİN VERİLERİNİ ÇEKME
@@ -82,6 +83,7 @@ fetch(apiUrl)
 // 2️⃣ ANA COİN LİSTESİ
 // -------------------------
 function displayCoins(coins) {
+  if(!coinList) return;
   coinList.innerHTML = "";
 
   coins.forEach(coin => {
@@ -100,10 +102,8 @@ function displayCoins(coins) {
     coinList.appendChild(col);
   });
 
-  // Kartlara tıklayınca satın alma ekranını aç
   document.querySelectorAll(".coin-card").forEach(card => {
     card.addEventListener("click", () => {
-      // Artık giriş kontrolü yok
       const coinId = card.getAttribute("data-id");
       const selectedCoin = coinsData.find(c => c.id === coinId);
       showBuyScreen(selectedCoin);
@@ -280,7 +280,7 @@ backHomeFromSettings.onclick = () => {
 // -------------------------
 // 8️⃣ HESAP / GİRİŞ / ÜYE OL
 // -------------------------
-// Artık testuser login bilgisi ile giriş yapılabilir
+
 accountBtn.addEventListener("click", () => {
   homeScreen.classList.add("d-none");
   buyScreen.classList.add("d-none");
@@ -305,7 +305,8 @@ loginBtn.addEventListener("click", () => {
   const username = usernameInput.value.trim();
   const password = passwordInput.value.trim();
 
-  if ((username === savedUser.username && password === savedUser.password)) {
+  // Önce örnek kullanıcı
+  if (username === savedUser.username && password === savedUser.password) {
     currentUser = username;
     balance = savedUser.balance;
     alert(`${currentUser} başarıyla giriş yaptı!`);
@@ -313,29 +314,30 @@ loginBtn.addEventListener("click", () => {
     userInfo.classList.remove("d-none");
     currentUserEl.textContent = currentUser;
     balanceEl.textContent = balance.toFixed(2);
-  } else {
-    // Normal kullanıcı kontrolleri
-    const storedUser = localStorage.getItem(`user_${username}`);
-    if (!storedUser) {
-      alert("Kullanıcı bulunamadı! Önce üye olun.");
-      return;
-    }
-
-    const userData = JSON.parse(storedUser);
-    if (userData.password !== password) {
-      alert("Şifre yanlış!");
-      return;
-    }
-
-    currentUser = username;
-    alert(`${currentUser} başarıyla giriş yaptı!`);
-    loginForm.classList.add("d-none");
-    userInfo.classList.remove("d-none");
-    currentUserEl.textContent = currentUser;
+    return;
   }
+
+  // LocalStorage kullanıcı
+  const storedUser = localStorage.getItem(`user_${username}`);
+  if (!storedUser) {
+    alert("Kullanıcı bulunamadı! Önce üye olun.");
+    return;
+  }
+
+  const userData = JSON.parse(storedUser);
+  if (userData.password !== password) {
+    alert("Şifre yanlış!");
+    return;
+  }
+
+  currentUser = username;
+  alert(`${currentUser} başarıyla giriş yaptı!`);
+  loginForm.classList.add("d-none");
+  userInfo.classList.remove("d-none");
+  currentUserEl.textContent = currentUser;
 });
 
-// Üye Ol’a basınca kayıt formu aç
+// Üye Ol’a basınca kayıt formunu göster
 registerBtn.addEventListener("click", () => {
   loginForm.classList.add("d-none");
   registerForm.classList.remove("d-none");
@@ -343,14 +345,17 @@ registerBtn.addEventListener("click", () => {
 
 // Üye kaydı submit
 registerSubmit.addEventListener("click", () => {
-  const firstNameVal = document.getElementById("firstName").value.trim();
-  const lastNameVal = document.getElementById("lastName").value.trim();
-  const ageVal = parseInt(document.getElementById("age").value.trim());
   const usernameVal = document.getElementById("regUsername").value.trim();
   const passwordVal = document.getElementById("regPassword").value.trim();
+  const passwordVal2 = document.getElementById("regPassword2").value.trim();
 
-  if (!firstNameVal || !lastNameVal || isNaN(ageVal) || !usernameVal || !passwordVal) {
+  if (!usernameVal || !passwordVal || !passwordVal2) {
     alert("Tüm alanları doldurun!");
+    return;
+  }
+
+  if (passwordVal !== passwordVal2) {
+    alert("Şifreler uyuşmuyor!");
     return;
   }
 
@@ -359,17 +364,24 @@ registerSubmit.addEventListener("click", () => {
     return;
   }
 
+  // Kullanıcıyı kaydet
   localStorage.setItem(`user_${usernameVal}`, JSON.stringify({
-    firstName: firstNameVal,
-    lastName: lastNameVal,
-    age: ageVal,
     username: usernameVal,
     password: passwordVal
   }));
 
-  alert("Üyelik başarılı! Şimdi giriş yapabilirsiniz.");
+  // Mesajı göster
+  registerMessage.textContent = "Kayıt işleminiz tamamlanmıştır. Lütfen giriş yapınız.";
+  registerMessage.style.display = "block";
+
+  // Kayıt formunu gizle, login formunu göster
   registerForm.classList.add("d-none");
   loginForm.classList.remove("d-none");
+
+  // 3 saniye sonra mesaj kaybolur
+  setTimeout(() => {
+    registerMessage.style.display = "none";
+  }, 3000);
 });
 
 // Kayıt iptal

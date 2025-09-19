@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Kayıt Ol</title>
+</head>
+<body>
+  <h2>Kayıt Ol</h2>
+  <form id="registerForm">
+    <input type="text" placeholder="Kullanıcı Adı" required><br><br>
+    <input type="password" placeholder="Şifre" required><br><br>
+    <button type="submit">Kayıt Ol</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("registerForm");
+
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+
+      // Kayıt tamamlandı mesajını localStorage'a kaydet
+      localStorage.setItem("registerMessage", "Kayıt işleminiz tamamlanmıştır. Lütfen giriş yapınız.");
+
+      // Login sayfasına yönlendir
+      window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>
